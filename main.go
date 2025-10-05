@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -19,6 +20,7 @@ type apiconfig struct {
 }
 
 func main() {
+
 	fmt.Println("hello world")
 	godotenv.Load(".env")
 	portstring := os.Getenv("PORT")
@@ -40,6 +42,8 @@ func main() {
 	apicfg := apiconfig{
 		DB: queries,
 	}
+	go startscrapping(queries, 10, 30*time.Second)
+
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"http://*", "https://*"},
@@ -59,6 +63,7 @@ func main() {
 	v1Router.Get("/allusers", apicfg.Getallusers)
 	v1Router.Get("/userfeed", apicfg.middlewareAuth(apicfg.handlerGetFeedfollows))
 	v1Router.Delete("/deleteuserfeed/{feedfollowid}", apicfg.middlewareAuth(apicfg.handlerDeletefeed))
+	v1Router.Get("/userposts", apicfg.middlewareAuth(apicfg.handlerGetPostsForUser))
 	router.Mount("/v1", v1Router)
 	srv := &http.Server{
 		Handler: router,

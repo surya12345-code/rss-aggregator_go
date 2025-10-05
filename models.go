@@ -85,3 +85,38 @@ func databaseGetuserfeedstofeeds(userfeeds []database.FeedFollow) []FeedFollow {
 	}
 	return Allfeeds
 }
+
+type Post struct {
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Title       string    `json:"title"`
+	Description *string   `json:"description"`
+	FeedID      uuid.UUID `json:"feed_id"`
+	PublishedAt time.Time `json:"published_at"`
+	Url         string    `json:"url"`
+}
+
+func databasePosttoPost(dbpost database.Post) Post {
+	var description *string
+	if dbpost.Description.Valid {
+		description = &dbpost.Description.String
+	}
+	return Post{
+		ID:          dbpost.ID,
+		CreatedAt:   dbpost.CreatedAt,
+		UpdatedAt:   dbpost.UpdatedAt,
+		Title:       dbpost.Title,
+		Description: description,
+		FeedID:      dbpost.FeedID,
+		PublishedAt: dbpost.PublishedAt,
+		Url:         dbpost.Url,
+	}
+}
+func databasepoststoposts(dbposts []database.Post) []Post {
+	posts := []Post{}
+	for _, post := range dbposts {
+		posts = append(posts, databasePosttoPost(post))
+	}
+	return posts
+}
